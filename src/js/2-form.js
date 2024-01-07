@@ -3,35 +3,45 @@ const form = document.querySelector('.feedback-form');
 const textarea = form.elements.message;
 const email = form.elements.email;
 
-form.addEventListener('submit', onFormSubmit);
-form.addEventListener('input', onFormInput);
-
 function onFormInput(evt) {
-  const formImput = {};
-  formImput.email = evt.currentTarget.elements.email.value.trim();
-  formImput.text = evt.currentTarget.elements.message.value.trim();
+  const formInput = {
+    email: evt.currentTarget.elements.email.value.trim(),
+    message: evt.currentTarget.elements.message.value.trim(),
+  };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formImput));
+  saveData(STORAGE_KEY, formInput);
 }
 
 function savedFormText() {
-  const savedmessage = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  if (savedmessage) {
-    textarea.value = savedmessage.text.trim();
-    email.value = savedmessage.email.trim();
+  try {
+    const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    textarea.value = savedData.message || '';
+    email.value = savedData.email || '';
+  } catch (error) {
+    console.error('Error while parsing saved data:', error);
   }
 }
-savedFormText();
+
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
 
 function onFormSubmit(event) {
   event.preventDefault();
-  const email = event.currentTarget.elements.email.value.trim();
-  const text = event.currentTarget.elements.message.value.trim();
-  if (email === '' || text === '') {
+  const emailValue = event.currentTarget.elements.email.value.trim();
+  const textValue = event.currentTarget.elements.message.value.trim();
+
+  if (emailValue === '' || textValue === '') {
     alert('Please fill in all the fields!');
     return;
   }
+
   console.log(JSON.parse(localStorage.getItem(STORAGE_KEY)));
   localStorage.removeItem(STORAGE_KEY);
   event.currentTarget.reset();
 }
+
+document.addEventListener('DOMContentLoaded', savedFormText);
+
+form.addEventListener('submit', onFormSubmit);
+form.addEventListener('input', onFormInput);
